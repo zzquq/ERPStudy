@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>layui</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" th:href="@{/lib/layui-v2.6.3/css/layui.css}" media="all">
+    <link rel="stylesheet" th:href="@{/css/public.css}" media="all">
+    <style>
+        body {
+            background-color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+<div class="layui-form layuimini-form">
+    <div class="layui-form-item">
+        <label class="layui-form-label required">名称</label>
+        <div class="layui-input-block">
+            <input type="text" name="name" lay-verify="required" lay-reqtext="名称不能为空" placeholder="请输入名称" value=""
+                   class="layui-input">
+        </div>
+    </div>
+
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">类别</label>
+        <div class="layui-input-inline">
+            <input type="text" name="category" placeholder="请选择" autocomplete="off" class="layui-input" id="category">
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">计量单位</label>
+        <div class="layui-input-inline">
+            <input type="text" name="measure" placeholder="请选择" autocomplete="off" class="layui-input" id="measure">
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">供应商</label>
+        <div class="layui-input-inline">
+            <input type="text" name="supplier" placeholder="请选择" autocomplete="off" class="layui-input" id="supplier">
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">安全存量</label>
+        <div class="layui-input-block">
+            <input type="number" name="safetyStock" placeholder="请输入安全存量" value="" class="layui-input">
+        </div>
+    </div>
+
+    <div class="layui-form-item layui-form-text">
+        <label class="layui-form-label">备注信息</label>
+        <div class="layui-input-block">
+            <textarea name="remark" class="layui-textarea" placeholder="请输入备注信息"></textarea>
+        </div>
+    </div>
+
+
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button class="layui-btn layui-btn-normal" lay-submit lay-filter="saveBtn">确认保存</button>
+        </div>
+    </div>
+</div>
+<script th:src="@{/lib/layui-v2.6.3/layui.js}" charset="utf-8"></script>
+<script th:src="@{/js/lay-config.js?v=1.0.4}" charset="utf-8"></script>
+<script th:src="@{/lib/jquery-3.4.1/jquery-3.4.1.min.js}"></script>
+<script>
+    layui.use(['form'], function () {
+        var form = layui.form,
+            layer = layui.layer,
+            $ = layui.$;
+
+        //监听提交
+        form.on('submit(saveBtn)', function (data) {
+            data = data.field;
+            $.ajax({
+                type: "POST",
+                url: "/commodity/addGoods",
+                data: data,
+                beforeSend: function () {
+                    layer.msg("正在处理...")
+                },
+                success: function (data) {
+                    if (data.code == 500) {
+                        layer.msg(data.message);
+                    } else {
+                        layer.msg(data.message);
+
+                        function send() {
+                            var iframeIndex = parent.layer.getFrameIndex(window.name);
+                            window.parent.location.reload();
+                            parent.layer.close(iframeIndex);
+                        }
+
+                        setTimeout(send, 1500);
+
+                    }
+                },
+                error: function (data) {
+                    layer.msg("添加失败！");
+                }
+            });
+        });
+
+    });
+
+    layui.use(['table', 'form', 'tableSelect'], function () {
+        var $ = layui.jquery,
+            table = layui.table,
+            form = layui.form,
+            tableSelect = layui.tableSelect;
+
+        tableSelect.render({
+        elem: '#category',
+        checkedKey: 'id',
+        searchKey: 'name',
+        table: {
+            url: 'getCategoryIdName',
+            cols: [
+                [
+                { type: 'radio' },
+                { field: 'id', title: 'ID' },
+                { field: 'name', title: '账户名' },
+            ]
+            ]
+        },
+        done: function (elem, data) {
+            var NEWJSON = []
+            layui.each(data.data, function (index, item) {
+                // NEWJSON.push(item.username)
+                NEWJSON.push(item.id)
+            })
+            elem.val(NEWJSON.join(","))
+        }
+    })
+
+        tableSelect.render({
+            elem: '#measure',
+            checkedKey: 'id',
+            searchKey: 'name',
+            table: {
+                url: 'measureInfo',
+                cols: [
+                    [
+                        { type: 'radio' },
+                        { field: 'id', title: 'ID' },
+                        { field: 'name', title: '类别名' },
+                    ]
+                ]
+            },
+            done: function (elem, data) {
+                var NEWJSON = []
+                layui.each(data.data, function (index, item) {
+                    // NEWJSON.push(item.username)
+                    NEWJSON.push(item.id)
+                })
+                elem.val(NEWJSON.join(","))
+            }
+        })
+
+        tableSelect.render({
+            elem: '#supplier',
+            searchKey: 'name',
+            checkedKey: 'id',
+            searchPlaceholder: '关键词搜索',
+            table: {
+                url: 'getSupplierIdName',
+                cols: [
+                    [
+                    { type: 'checkbox' },
+                    { field: 'id', title: 'ID', width: 100 },
+                    { field: 'name', title: '供应商名称', width: 300 },
+                ]
+                ]
+            },
+            done: function (elem, data) {
+                var NEWJSON = []
+                layui.each(data.data, function (index, item) {
+                    NEWJSON.push(item.id)
+                })
+                elem.val(NEWJSON.join(","))
+            }
+        })
+    });
+</script>
+</body>
+</html>

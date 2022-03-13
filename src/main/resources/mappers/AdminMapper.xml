@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.syuct.mapper.AdminMapper">
+
+    <!--    通过用户名查询用户-->
+    <select id="getAdminByusername" parameterType="String" resultType="com.syuct.pojo.Admin">
+        select *
+        from admin
+        where username = #{username};
+    </select>
+
+    <!--    查询角色信息-->
+    <select id="getUsers" resultType="com.syuct.pojo.Admin">
+        select id, username, name, phone, email, remark, role
+        from admin;
+
+    </select>
+
+    <!--    通过用户id查询角色信息-->
+    <select id="getRoleByid" parameterType="int" resultType="String">
+        SELECT r.name
+        FROM roles as r,
+             admin as a,
+             roles_admin as ra
+        where a.id = ra.adminid
+          and r.id = ra.roleid
+          and a.id = #{id}
+    </select>
+
+    <!--通过用户名查询用户角色信息-->
+    <select id="getRoleIdByusername" parameterType="String" resultType="int">
+        SELECT r.roleid
+        FROM admin AS a,
+             roles_admin AS r
+        WHERE a.id = r.adminid
+          AND a.username = #{username}
+    </select>
+
+    <!--    更新用户Vo信息-->
+    <update id="updUserInfo" parameterType="com.syuct.pojo.Admin">
+        update admin
+        set username = #{username},
+            name     = #{name},
+            phone    = #{phone},
+            email    = #{email},
+            remark   = #{remark}
+        where id = #{id};
+
+    </update>
+
+    <update id="updUser" parameterType="admin">
+        update admin
+        set username = #{username},
+            password = #{password},
+            name     = #{name},
+            phone    = #{phone},
+            email    = #{email},
+            remark   = #{remark},
+            role     = #{role}
+        where id = #{id};
+    </update>
+    <!--    通过id更新用户信息-->
+    <update id="updUseById" parameterType="com.syuct.pojo.Admin">
+        update admin
+        set username = #{username},
+            password = #{password},
+            name     = #{name},
+            phone    = #{phone},
+            email    = #{email},
+            remark   = #{remark},
+            role     = #{role}
+        where id = #{id};
+
+    </update>
+
+    <!--    分页查询用户信息-->
+    <select id="getUsersByPage" resultType="admin">
+        select id, username, name, phone, email, remark, role
+        from admin
+        limit #{page},#{limit};
+
+    </select>
+
+    <!--    得到用户数量-->
+    <select id="getUserCounts" resultType="int">
+        select count(*)
+        from admin;
+
+    </select>
+
+    <select id="getUserCountsByParams" resultType="int">
+        select count(*)
+        from admin
+        <where>
+            <if test="id != null and id.trim() != ''">
+                AND id = #{id}
+            </if>
+            <if test="username != null  and username.trim() != ''">
+                AND username like CONCAT('%',#{username},'%')
+            </if>
+            <if test="name != null and name.trim() != ''">
+                AND name like CONCAT('%',#{name},'%')
+            </if>
+        </where>
+    </select>
+
+    <!--    添加用户,逐渐自增,并返回自增主键值-->
+    <insert id="addUser" parameterType="admin" useGeneratedKeys="true" keyProperty="id">
+        insert into admin (username, password, name, phone, email, remark, role)
+        VALUES (#{username}, #{password}, #{name}, #{phone}, #{email}, #{remark}, #{role});
+
+    </insert>
+
+    <select id="getAdminById" parameterType="int" resultType="admin">
+        select id, username, name, phone, email, remark, role
+        from admin
+        where id = #{id};
+
+    </select>
+
+    <update id="updRole">
+        update roles_admin
+        set roleid = #{roleid}
+        where adminid = #{adminid};
+
+    </update>
+    <delete id="delUserById" parameterType="int">
+        delete
+        from admin
+        where id = #{id};
+        delete
+        from roles_admin
+        where adminid = #{id};
+
+    </delete>
+
+    <select id="getUsersByParams" resultType="admin">
+        select id, username, name, phone, email, remark, role
+        from admin
+        <where>
+            <if test="id != null and id.trim() != ''">
+                AND id = #{id}
+            </if>
+            <if test="username != null  and username.trim() != ''">
+                AND username like CONCAT('%',#{username},'%')
+            </if>
+            <if test="name != null and name.trim() != ''">
+                AND name like CONCAT('%',#{name},'%')
+            </if>
+        </where>
+        limit #{page},#{limit};
+    </select>
+</mapper>

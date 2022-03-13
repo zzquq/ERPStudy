@@ -1,0 +1,389 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.syuct.mapper.ReportMapper">
+
+    <select id="getAccountReportCounts" resultType="java.lang.Integer">
+        select count(*)
+        from order_log;
+
+    </select>
+    <select id="getAccountReportByPage" resultType="com.syuct.pojo.vo.AccountReportVo">
+        select order_log.id, account.name as name, account.account_number as accountNumber, type, origin, money, orderId, date
+        from order_log,
+             account where order_log.account = account.id
+        order by date desc
+        limit #{page}, #{limit};
+
+    </select>
+    <select id="getAccountReportCountsByParams" resultType="java.lang.Integer">
+        select count(*)
+        from order_log
+            <where>
+                <if test="type != null">
+                    AND type = #{type}
+                </if>
+                <if test="name != null">
+                   AND order_log.account = #{name}
+                </if>
+            </where>
+    </select>
+    <select id="getAccountReportByParams" resultType="com.syuct.pojo.vo.AccountReportVo">
+        select order_log.id, account.name as name, account.account_number as accountNumber, type, origin, money, orderId, date
+        from order_log,
+             account
+        <where>
+            order_log.account = account.id
+            <if test="type != null">
+                AND type = #{type}
+            </if>
+            <if test="name != null">
+                AND order_log.account = #{name}
+            </if>
+        </where>
+        order by date desc
+        limit #{page}, #{limit};
+
+    </select>
+    <select id="getPurchaseReportBypage" resultType="com.syuct.pojo.vo.PurchaseReportVo">
+        select goods.id, goods.name as goodsName, order_list.number as number, order_list.price as money
+        from goods,
+             `order`,
+             order_list
+        where order.list = order_list.orderId
+          and order_list.goodsId = goods.id
+          and `order`.status = 2
+        ;
+
+
+    </select>
+    <select id="getPurchaseReportByParams" resultType="com.syuct.pojo.vo.PurchaseReportVo">
+        select goods.id, goods.name as goodsName, order_list.number as number, order_list.price as money
+        from goods,
+        `order`,
+        order_list
+        <where>
+            order.list = order_list.orderId
+            and order_list.goodsId = goods.id
+            and `order`.status = 2
+            <if test="goodsIdByName != null ">
+                and goods.id = #{goodsIdByName}
+            </if>
+            <if test="startDate != null">
+                and UNIX_TIMESTAMP(order.updateTime) &gt;= UNIX_TIMESTAMP(#{startDate})
+            </if>
+            <if test="endDate != null">
+                and UNIX_TIMESTAMP(order.updateTime) &lt;= UNIX_TIMESTAMP(#{endDate})
+            </if>
+        </where>;
+
+
+    </select>
+    <select id="getSaleReportBypage" resultType="com.syuct.pojo.vo.PurchaseReportVo">
+        select goods.id, goods.name as goodsName, order_list.number as number, order_list.price as money
+        from goods,
+             `order`,
+             order_list
+        where order.list = order_list.orderId
+          and order_list.goodsId = goods.id
+          and `order`.status = 7
+        ;
+
+    </select>
+    <select id="getSaleReportByParams" resultType="com.syuct.pojo.vo.PurchaseReportVo">
+        select goods.id, goods.name as goodsName, order_list.number as number, order_list.price as money
+        from goods,
+        `order`,
+        order_list
+        <where>
+            order.list = order_list.orderId
+            and order_list.goodsId = goods.id
+            and `order`.status = 7
+            <if test="goodsIdByName != null ">
+                and goods.id = #{goodsIdByName}
+            </if>
+            <if test="startDate != null">
+                and UNIX_TIMESTAMP(order.updateTime) &gt;= UNIX_TIMESTAMP(#{startDate})
+            </if>
+            <if test="endDate != null">
+                and UNIX_TIMESTAMP(order.updateTime) &lt;= UNIX_TIMESTAMP(#{endDate})
+            </if>
+        </where>;
+
+
+    </select>
+    <select id="getInStoreLogCount" resultType="java.lang.Integer">
+        select count(*)
+        from store_log
+        where type = 0
+           or type = 3
+           or type = 5
+           or type = 7;
+
+    </select>
+    <select id="getInStoreLogByPage" resultType="com.syuct.pojo.vo.StoreLogVo">
+        select store_log.id, type, store.name as storeName, goods.name as goodsName, number, admin.name as person, date
+        from store_log,
+             goods,
+             store,
+             admin
+        where (type = 0
+            or type = 3
+            or type = 5
+            or type = 7)
+          and storeId = store.id
+          and admin.id = store_log.person
+          and goodsId = goods.id
+        order by date desc ;
+
+
+    </select>
+    <select id="getInStoreLogCountByParams" resultType="java.lang.Integer">
+        select count(*) from store_log
+        where (type = 0 or type = 3 or type = 5 or type = 7)
+
+            <if test="goodsId != null">
+                AND goodsId = #{goodsId}
+            </if>
+            <if test="storeId != null">
+                AND storeId = #{storeId}
+            </if>
+            <if test="startDate != null">
+                and UNIX_TIMESTAMP(store_log.date) &gt;= UNIX_TIMESTAMP(#{startDate})
+            </if>
+            <if test="endDate != null">
+                and UNIX_TIMESTAMP(store_log.date) &lt;= UNIX_TIMESTAMP(#{endDate})
+            </if>
+
+    </select>
+
+    <select id="getInStoreLogByParams" resultType="com.syuct.pojo.vo.StoreLogVo">
+        select store_log.id, type, store.name as storeName, goods.name as goodsName, number, admin.name as person, date
+        from store_log,
+             goods,
+             store,
+             admin
+        where (type = 0 or type = 3 or type = 5 or type = 7)
+            and storeId = store.id
+            and admin.id = store_log.person
+            and goodsId = goods.id
+            <if test="goodsId != null">
+                AND goodsId = #{goodsId}
+            </if>
+            <if test="storeId != null">
+                AND storeId = #{storeId}
+            </if>
+            <if test="startDate != null">
+                and UNIX_TIMESTAMP(store_log.date) &gt;= UNIX_TIMESTAMP(#{startDate})
+            </if>
+            <if test="endDate != null">
+                and UNIX_TIMESTAMP(store_log.date) &lt;= UNIX_TIMESTAMP(#{endDate})
+            </if>
+        order by date desc ;
+
+    </select>
+    <select id="getOutStoreLogCount" resultType="java.lang.Integer">
+        select count(*)
+        from store_log
+        where type = 1
+           or type = 4
+           or type = 6
+           or type = 8;
+
+    </select>
+    <select id="getOutStoreLogByPage" resultType="com.syuct.pojo.vo.StoreLogVo">
+        select store_log.id, type, store.name as storeName, goods.name as goodsName, number, admin.name as person, date
+        from store_log,
+             goods,
+             store,
+             admin
+        where (type = 1
+            or type = 4
+            or type = 6
+            or type = 8)
+          and storeId = store.id
+          and admin.id = store_log.person
+          and goodsId = goods.id
+        order by date desc ;
+
+
+
+    </select>
+    <select id="getOutStoreLogCountByParams" resultType="java.lang.Integer">
+        select count(*) from store_log
+        where (type = 1 or type = 4 or type = 6 or type = 8)
+
+        <if test="goodsId != null">
+            AND goodsId = #{goodsId}
+        </if>
+        <if test="storeId != null">
+            AND storeId = #{storeId}
+        </if>
+        <if test="startDate != null">
+            and UNIX_TIMESTAMP(store_log.date) &gt;= UNIX_TIMESTAMP(#{startDate})
+        </if>
+        <if test="endDate != null">
+            and UNIX_TIMESTAMP(store_log.date) &lt;= UNIX_TIMESTAMP(#{endDate})
+        </if>
+
+    </select>
+    <select id="getOutStoreLogByParams" resultType="com.syuct.pojo.vo.StoreLogVo">
+        select store_log.id, type, store.name as storeName, goods.name as goodsName, number, admin.name as person, date
+        from store_log,
+        goods,
+        store,
+        admin
+        where (type = 1 or type = 4 or type = 6 or type = 8)
+        and storeId = store.id
+        and admin.id = store_log.person
+        and goodsId = goods.id
+        <if test="goodsId != null">
+            AND goodsId = #{goodsId}
+        </if>
+        <if test="storeId != null">
+            AND storeId = #{storeId}
+        </if>
+        <if test="startDate != null">
+            and UNIX_TIMESTAMP(store_log.date) &gt;= UNIX_TIMESTAMP(#{startDate})
+        </if>
+        <if test="endDate != null">
+            and UNIX_TIMESTAMP(store_log.date) &lt;= UNIX_TIMESTAMP(#{endDate})
+        </if>
+        order by date desc ;
+
+    </select>
+    <select id="getBackStoreLogCount" resultType="java.lang.Integer">
+        select count(*)
+        from store_log
+        where type = 7
+           or type = 8;
+
+    </select>
+    <select id="getBackStoreLogByPage" resultType="com.syuct.pojo.vo.StoreLogVo">
+        select store_log.id, type, store.name as storeName, goods.name as goodsName, number, admin.name as person, date
+        from store_log,
+             goods,
+             store,
+             admin
+        where (type = 7
+            or type = 8)
+          and storeId = store.id
+          and admin.id = store_log.person
+          and goodsId = goods.id
+        order by date desc ;
+
+
+    </select>
+    <select id="getBackStoreLogCountByParams" resultType="java.lang.Integer">
+        select count(*) from store_log
+        <where>
+            <if test="type == 7">
+                AND type = 7
+            </if>
+            <if test="type == 8">
+                AND type = 8
+            </if>
+            <if test="type == 0">
+                AND (type = 7 or type = 8)
+            </if>
+            <if test="goodsId != null">
+                AND goodsId = #{goodsId}
+            </if>
+            <if test="startDate != null">
+                and UNIX_TIMESTAMP(store_log.date) &gt;= UNIX_TIMESTAMP(#{startDate})
+            </if>
+            <if test="endDate != null">
+                and UNIX_TIMESTAMP(store_log.date) &lt;= UNIX_TIMESTAMP(#{endDate})
+            </if>
+        </where>
+
+
+    </select>
+    <select id="getBackStoreLogByParams" resultType="com.syuct.pojo.vo.StoreLogVo">
+        select store_log.id, type, store.name as storeName, goods.name as goodsName, number, admin.name as person, date
+        from store_log,
+        goods,
+        store,
+        admin
+        where storeId = store.id
+        and admin.id = store_log.person
+        and goodsId = goods.id
+        <if test="type == 7">
+            AND type = 7
+        </if>
+        <if test="type == 8">
+            AND type = 8
+        </if>
+        <if test="type == 0">
+            AND (type = 7 or type = 8)
+        </if>
+        <if test="goodsId != null">
+            AND goodsId = #{goodsId}
+        </if>
+        <if test="startDate != null">
+            and UNIX_TIMESTAMP(store_log.date) &gt;= UNIX_TIMESTAMP(#{startDate})
+        </if>
+        <if test="endDate != null">
+            and UNIX_TIMESTAMP(store_log.date) &lt;= UNIX_TIMESTAMP(#{endDate})
+        </if>
+        order by date desc ;
+
+    </select>
+    <select id="getWarningGoodsCount" resultType="java.lang.Integer">
+        SELECT count(*)
+        FROM `goods`,
+             `store_inventory`
+        WHERE goods.safety_stock &gt; store_inventory.inventory
+          AND goods.id = store_inventory.goodsId;
+
+    </select>
+    <select id="getWarningGoodsInfoByPage" resultType="com.syuct.pojo.vo.WarningVo">
+        select goods.id,
+               store.name                as storeName,
+               goods.name                as goodsName,
+               store_inventory.inventory as number,
+               goods.safety_stock        as safety
+        from store_inventory,
+             goods,
+             store
+        where store_inventory.goodsId = goods.id
+          and goods.safety_stock &gt; store_inventory.inventory
+          and store.id = store_inventory.storeId order by storeId;
+
+
+    </select>
+    <select id="getWarningGoodsCountByParams" resultType="java.lang.Integer">
+        SELECT count(*)
+        FROM `goods`,
+        `store_inventory`
+        WHERE goods.safety_stock &gt; store_inventory.inventory
+        AND goods.id = store_inventory.goodsId
+        <if test="goodsId != null">
+            AND store_inventory.goodsId = #{goodsId}
+        </if>
+        <if test="storeId != null">
+            AND store_inventory.storeId = #{storeId};
+        </if>
+    </select>
+    <select id="getWarningGoodsInfoByParams" resultType="com.syuct.pojo.vo.WarningVo">
+        select goods.id,
+        store.name as storeName,
+        goods.name as goodsName,
+        store_inventory.inventory as number,
+        goods.safety_stock as safety
+        from store_inventory,
+        goods,
+        store
+        where store_inventory.goodsId = goods.id
+        and goods.safety_stock &gt; store_inventory.inventory
+        and store.id = store_inventory.storeId
+        <if test="goodsId != null">
+            AND store_inventory.goodsId = #{goodsId}
+        </if>
+        <if test="storeId != null">
+            AND store_inventory.storeId = #{storeId}
+        </if>
+        order by storeId;
+
+    </select>
+
+</mapper>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.syuct.mapper.MainMapper">
+    <select id="getSaleCount" resultType="java.lang.Integer">
+        select SUM(order_list.number)
+        from `order`,
+             `order_list`
+        where date_sub(CURDATE(), interval 30 day) &lt;= `order`.createTime
+          and `order`.list = `order_list`.orderId
+          and `order`.status = 7;
+
+
+    </select>
+    <select id="getSumSaleCount" resultType="java.lang.Integer">
+        select SUM(order_list.number)
+        from `order`,
+             `order_list`
+        where `order`.list = `order_list`.orderId
+          and `order`.status = 7;
+
+
+    </select>
+    <select id="getsaleMoneyCount" resultType="java.lang.Integer">
+        select SUM(money)
+        from order_log
+        where type = 2 and date_sub(CURDATE(), interval 30 day) &lt;= order_log.date;
+
+    </select>
+    <select id="getSumMoneyCount" resultType="java.lang.Integer">
+        select SUM(money)
+        from order_log
+        where type = 2;
+
+    </select>
+    <select id="getSaleNumber" resultType="java.lang.Integer">
+        select count(*)
+        from goods
+        where status = 1;
+
+    </select>
+    <select id="getGoodsCount" resultType="java.lang.Integer">
+        select count(*)
+        from goods;
+
+    </select>
+    <select id="getWarningCount" resultType="java.lang.Integer">
+        SELECT count(*)
+        FROM `goods`,
+             `store_inventory`
+        WHERE goods.safety_stock &gt; store_inventory.inventory
+          AND goods.id = store_inventory.goodsId;
+
+    </select>
+</mapper>

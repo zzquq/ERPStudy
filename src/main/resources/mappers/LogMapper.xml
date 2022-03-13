@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.syuct.mapper.LogMapper">
+
+    <!--    添加用户时，为用户赋予角色信息-->
+    <insert id="saveLog" parameterType="log" useGeneratedKeys="true" keyProperty="id">
+        insert into log (username, name, module, operation, url, ip, date, status)
+        values (#{username}, #{name}, #{module}, #{operation}, #{url}, #{ip}, #{date}, #{status});
+
+    </insert>
+
+    <select id="getLogByPage" resultType="log">
+        select id,
+               username,
+               name,
+               module,
+               operation,
+               url,
+               ip,
+               date
+        from log
+        where status = 1
+        order by date desc
+        limit #{page}, #{limit}
+    </select>
+
+    <select id="getLogCounts" resultType="int">
+        select count(*)
+        from log;
+
+    </select>
+
+    <update id="delLog" parameterType="int">
+        update log
+        set status = 0
+        where id = #{id};
+
+    </update>
+    <!--    #         order by date desc-->
+    <select id="getLogByParams" resultType="log">
+        select id, username, name, module, operation, url, ip, date
+        from log
+        <where>
+            status = 1
+            <if test="username != null and username.trim() != ''">
+                AND username like CONCAT('%',#{username},'%')
+            </if>
+            <if test="name != null  and name.trim() != ''">
+                AND name like CONCAT('%',#{name},'%')
+            </if>
+            <if test="module != null and module.trim() != ''">
+                AND module like CONCAT('%',#{module},'%')
+            </if>
+        </where>
+        ORDER BY date DESC
+        limit #{page},#{limit};
+    </select>
+
+    <select id="getLogCountsByParams" resultType="int">
+        select count(*)
+        from log
+        <where>
+            status = 1
+            <if test="username != null and username.trim() != ''">
+                AND username like CONCAT('%',#{username},'%')
+            </if>
+            <if test="name != null  and name.trim() != ''">
+                AND name like CONCAT('%',#{name},'%')
+            </if>
+            <if test="module != null and module.trim() != ''">
+                AND module like CONCAT('%',#{module},'%')
+            </if>
+        </where>
+    </select>
+</mapper>
+
+
+
+
+

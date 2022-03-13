@@ -1,0 +1,446 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.syuct.mapper.InfoMapper">
+    <insert id="addAccount" parameterType="account" useGeneratedKeys="true">
+        insert into account (id, name, account_number, now_money, remark, flag, status)
+        VALUES (#{id}, #{name}, #{accountNumber}, #{nowMoney}, #{remark}, #{flag}, #{status});
+
+    </insert>
+    <insert id="addSupplier">
+        insert into supplier (name, phone, address, fax, email, account_id, remark, status)
+        VALUES (#{name}, #{phone}, #{address}, #{fax}, #{email}, #{accountId}, #{remark}, #{status});
+
+    </insert>
+    <insert id="addMumber">
+        insert into member (id, name, phone, email, discount, status, remark)
+        values (#{id}, #{name}, #{phone}, #{email}, #{discount}, #{status}, #{remark});
+
+    </insert>
+    <insert id="addStore">
+        insert into store (name, address, status, remark)
+        VALUES (#{name}, #{address}, #{status}, #{remark});
+
+    </insert>
+    <update id="updAccountInfo" parameterType="account">
+        update account
+        set name           = #{name},
+            account_number = #{accountNumber},
+            now_money      = #{nowMoney},
+            remark         = #{remark},
+            flag           = #{flag}
+        where id = #{id};
+
+    </update>
+
+    <delete id="delSupplierByid">
+        delete
+        from supplier
+        where id = #{id};
+
+    </delete>
+    <update id="delStoreById">
+        update store
+        set status = 0
+        where id = #{id};
+
+    </update>
+    <update id="delMemberById">
+        update member
+        set status = 0
+        where id = #{id};
+
+    </update>
+
+
+    <update id="delAccountById">
+        update account
+        set status = 0
+        where id = #{id};
+    </update>
+
+    <update id="updSupplierInfo">
+        update supplier
+        set name       = #{name},
+            phone      = #{phone},
+            address    = #{address},
+            fax        = #{fax},
+            email      = #{email},
+            account_id = #{accountId},
+            remark     = #{remark}
+        where id = #{id};
+
+    </update>
+    <update id="editMember">
+        update member
+        set name     = #{name},
+            phone    = #{phone},
+            email    = #{email},
+            discount = #{discount},
+            remark   = #{remark}
+        where id = #{id};
+
+    </update>
+
+    <update id="editStore">
+        update store
+        set name    = #{name},
+            address = #{address},
+            remark  = #{remark}
+        where id = #{id};
+    </update>
+    <update id="updAccountNowMoneyById">
+        update account
+        set now_money = #{money}
+        where id = #{id};
+
+    </update>
+
+    <!--    <delete id="delAccountById">-->
+    <!--        delete-->
+    <!--        from account-->
+    <!--        where id = #{id};-->
+
+    <!--    </delete>-->
+
+
+    <select id="getSupplierInfoByPage" resultType="supplier">
+        select id,
+               name,
+               phone,
+               address,
+               fax,
+               email,
+               account_id,
+               remark
+        from supplier
+        where status = 1
+        limit #{page}, #{limit};
+
+    </select>
+    <select id="getSupplierCounts" resultType="java.lang.Integer">
+        select count(*)
+        from supplier
+        where status = 1;
+
+
+    </select>
+    <select id="getSupplierInfoByParams" resultType="com.syuct.pojo.Supplier">
+        select id,
+        name,
+        phone,
+        address,
+        fax,
+        email,
+        account_id,
+        remark
+        from supplier
+        <where>
+            status = 1
+            <if test="id != 0">
+                AND id = #{id}
+            </if>
+            <if test="name != null  and name.trim() != ''">
+                AND name like CONCAT('%',#{name},'%')
+            </if>
+        </where>
+        limit #{page}, #{limit};
+    </select>
+    <select id="getSupplierCountsByParams" resultType="java.lang.Integer">
+        select count(*) from supplier
+        <where>
+            status = 1
+            <if test="id != 0">
+                AND id = #{id}
+            </if>
+            <if test="name != null  and name.trim() != ''">
+                AND name like CONCAT('%',#{name},'%')
+            </if>
+        </where>
+        limit #{page}, #{limit};
+    </select>
+    <select id="getAccountInfoByPage" resultType="com.syuct.pojo.Account">
+        select id, name, account_number, now_money, remark, flag
+        from account
+        where status = 1
+        limit #{page},#{limit};
+
+    </select>
+    <select id="getAccountCounts" resultType="java.lang.Integer">
+        select count(*)
+        from account
+        where status = 1;
+
+    </select>
+    <select id="getAccountInfoByParams" resultType="com.syuct.pojo.Account">
+        select id, name, account_number, now_money, remark, flag
+        from account
+        <where>
+            status = 1
+            <if test="id != 0">
+                AND id = #{id}
+            </if>
+            <if test="name != null  and name.trim() != ''">
+                AND name like CONCAT('%',#{name},'%')
+            </if>
+            <if test="flag != null and flag.trim() != ''">
+                AND flag = #{flag}
+            </if>
+        </where>
+        limit #{page}, #{limit};
+    </select>
+
+    <select id="getAccountCountsByParams" resultType="java.lang.Integer">
+        select count(*) from account
+        <where>
+            status = 1
+            <if test="id != 0">
+                AND id = #{id}
+            </if>
+            <if test="name != null  and name.trim() != ''">
+                AND name like CONCAT('%',#{name},'%')
+            </if>
+        </where>
+    </select>
+
+    <select id="getgetAccountInfoById" resultType="com.syuct.pojo.Account">
+        select id, name, account_number, now_money, remark, flag
+        from account
+        where id = #{id}
+          AND status = 1;
+
+    </select>
+    <select id="getAccountInfoByPageParam" resultType="com.syuct.pojo.Account">
+        select id, name, account_number, now_money, remark, flag
+        from account
+        where name like CONCAT('%', #{name}, '%')
+          AND status = 1
+        limit #{page},#{limit};
+
+
+    </select>
+    <select id="getSupplierInfoById" resultType="com.syuct.pojo.Supplier">
+        select *
+        from supplier
+        where id = #{id}
+          and status = 1;
+
+    </select>
+    <select id="getMemberCounts" resultType="java.lang.Integer">
+        select count(*)
+        from member
+        where status = 1;
+
+    </select>
+    <select id="getMemberInfoByPage" resultType="com.syuct.pojo.Member">
+        select id, name, phone, email, discount, status, remark
+        from member
+        where status = 1;
+
+    </select>
+    <select id="getMemberCountsByParams" resultType="java.lang.Integer">
+        select count(*)
+        from member
+        <where>
+            status = 1
+            <if test="id != 0">
+                AND id = #{id}
+            </if>
+            <if test="name != null  and name.trim() != ''">
+                AND name like CONCAT('%',#{name},'%')
+            </if>
+            <if test="phone != null  and phone.trim() != ''">
+                AND phone like CONCAT('%',#{phone},'%')
+            </if>
+        </where>
+
+    </select>
+    <select id="getMemberInfoByParas" resultType="com.syuct.pojo.Member">
+        select id, name, phone, email, discount, status, remark
+        from member
+        <where>
+            status = 1
+            <if test="id != 0">
+                AND id = #{id}
+            </if>
+            <if test="name != null  and name.trim() != ''">
+                AND name like CONCAT('%',#{name},'%')
+            </if>
+            <if test="phone != null  and phone.trim() != ''">
+                AND phone like CONCAT('%',#{phone},'%')
+            </if>
+        </where>
+        limit #{page},#{limit};
+    </select>
+    <select id="getMemberInfoById" resultType="com.syuct.pojo.Member">
+        select id, name, phone, email, discount, status, remark
+        from member
+        where id = #{id};
+
+
+    </select>
+    <select id="getStoreCounts" resultType="java.lang.Integer">
+        select count(*)
+        from store
+        where status = 1;
+
+    </select>
+    <select id="getStoreInfoByPage" resultType="com.syuct.pojo.Store">
+        select id, name, address, status, remark
+        from store
+        where status = 1;
+
+    </select>
+    <select id="getStoreCountsByParams" resultType="java.lang.Integer">
+        select count(*)
+        from store
+        <where>
+            status = 1
+            <if test="id != 0">
+                AND id = #{id}
+            </if>
+            <if test="name != null  and name.trim() != ''">
+                AND name like CONCAT('%',#{name},'%')
+            </if>
+            <if test="address != null  and address.trim() != ''">
+                AND address like CONCAT('%',#{address},'%');
+
+            </if>
+        </where>
+
+    </select>
+    <select id="getStoreInfoByParams" resultType="com.syuct.pojo.Store">
+        select id, name, address, status, remark
+        from store
+        <where>
+            status = 1
+            <if test="id != 0">
+                AND id = #{id}
+            </if>
+            <if test="name != null  and name.trim() != ''">
+                AND name like CONCAT('%',#{name},'%')
+            </if>
+            <if test="address != null  and address.trim() != ''">
+                AND address like CONCAT('%',#{address},'%')
+            </if>
+        </where>
+        limit #{page},#{limit};
+
+
+    </select>
+    <select id="getStoreInfoById" resultType="com.syuct.pojo.Store">
+        select id, name, address, status, remark
+        from store
+        where status = 1
+          and id = #{id};
+
+
+    </select>
+    <select id="getSupplierAccountInfoByPage" resultType="com.syuct.pojo.Account">
+        select id, name, account_number, now_money, remark, flag
+        from account
+        where status = 1 and flag = 1
+        limit #{page},#{limit};
+
+    </select>
+
+    <select id="getSupplierAccountCounts" resultType="java.lang.Integer">
+        select count(*)
+        from account
+        where status = 1 and flag = 1;
+
+    </select>
+
+    <select id="getSupplierAccountInfoByPageParam" resultType="com.syuct.pojo.Account">
+        select id, name, account_number, now_money, remark, flag
+        from account
+        where name like CONCAT('%', #{searchParams}, '%')
+          AND status = 1
+          and flag = 1
+        limit #{page},#{limit};
+
+
+    </select>
+
+    <select id="getSupplierAccountCountsByParams" resultType="java.lang.Integer">
+        select count(*) from account
+        <where>
+            status = 1 and flag = 1
+            <if test="name != null  and name.trim() != ''">
+                AND name like CONCAT('%',#{searchParams},'%')
+            </if>
+        </where>
+    </select>
+    <select id="getStoreInfoByName" resultType="com.syuct.pojo.Store">
+        select id, name, address, status, remark
+        from store
+        where name = #{name};
+
+    </select>
+    <select id="getSupplierIdByName" resultType="java.lang.Integer">
+        select id
+        from supplier where name = #{name};
+
+    </select>
+
+    <select id="getSystemAccountInfoByPage" resultType="com.syuct.pojo.Account">
+        select id, name, account_number, now_money, remark, flag
+        from account
+        where status = 1 and flag = 0
+        limit #{page},#{limit};
+
+    </select>
+
+    <select id="getSystemAccountCounts" resultType="java.lang.Integer">
+        select count(*)
+        from account
+        where status = 1 and flag = 0;
+
+    </select>
+
+
+    <select id="getSystemAccountInfoByParams" resultType="com.syuct.pojo.Account">
+        select id, name, account_number, now_money, remark, flag
+        from account
+        where name like CONCAT('%', #{searchParams}, '%')
+          AND status = 1
+          and flag = 0
+        limit #{page},#{limit};
+
+
+    </select>
+
+    <select id="getSystemAccountCountsByParams" resultType="java.lang.Integer">
+        select count(*) from account
+        <where>
+            status = 1 and flag = 0
+            <if test="name != null  and name.trim() != ''">
+                AND name like CONCAT('%',#{searchParams},'%')
+            </if>
+        </where>
+    </select>
+    <select id="getMemberIdByName" resultType="java.lang.Integer">
+        select id
+        from member where name = #{name};
+
+    </select>
+    <select id="getGoodsIdByName" resultType="java.lang.Integer">
+        select id
+        from goods
+        where name = #{goodsName};
+
+    </select>
+    <select id="getStoreIdByName" resultType="java.lang.Integer">
+        select id
+        from store
+        where name = #{storeName};
+
+    </select>
+</mapper>
+
+
+
+
+

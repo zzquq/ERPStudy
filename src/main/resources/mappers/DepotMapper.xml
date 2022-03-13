@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.syuct.mapper.DepotMapper">
+    <insert id="addStoreOutIn">
+        insert into store_outin (storeOut, goodsId, number, storeIn, creatTime, status, deleteFlag)
+        values (#{storeOut}, #{goodsId}, #{number}, #{storeIn}, #{creatTime}, #{status}, #{deleteFlag});
+
+    </insert>
+    <update id="delOutIn">
+        update store_outin
+        set deleteFlag = 1
+        where id = #{id};
+
+    </update>
+    <update id="verifyOutIn">
+        update store_outin
+        set status = 1
+        where id = #{id};
+
+    </update>
+
+    <select id="getDepotInventoryCount" resultType="java.lang.Integer">
+        select count(*)
+        from store_inventory;
+
+    </select>
+    <select id="getDepotInventoryByPage" resultType="com.syuct.pojo.vo.DepotInventoryVo">
+        select store_inventory.id,
+               goods.name   as goodsName,
+               store.name   as storeName,
+               store_inventory.inventory,
+               measure.name as measure
+        from store_inventory,
+             goods,
+             store,
+             measure
+        where goodsId = goods.id
+          and storeId = store.id
+          and goods.measure_id = measure.id
+        order by store.name desc
+        limit #{page}, #{limit};
+
+
+
+    </select>
+    <select id="getDepotInventoryCountByparams" resultType="java.lang.Integer">
+        select count(*)
+        from store_inventory, goods, store
+        <where>
+            goods.id = store_inventory.goodsId and store_inventory.storeId = store.id
+            <if test="goodsName != null  and goodsName.trim() != ''">
+                AND goods.name = #{goodsName}
+            </if>
+            <if test="storeName != null  and storeName.trim() != ''">
+                AND store.name = #{storeName}
+            </if>
+        </where>
+    </select>
+    <select id="getDepotInventoryByParams" resultType="com.syuct.pojo.vo.DepotInventoryVo">
+        select store_inventory.id,
+               goods.name   as goodsName,
+               store.name   as storeName,
+               store_inventory.inventory,
+               measure.name as measure
+        from store_inventory,
+             goods,
+             store,
+             measure
+        <where>
+            goodsId = goods.id
+            and storeId = store.id
+            and goods.measure_id = measure.id
+            <if test="goodsName != null  and goodsName.trim() != ''">
+                AND goods.name = #{goodsName}
+            </if>
+            <if test="storeName != null  and storeName.trim() != ''">
+                AND store.name = #{storeName}
+            </if>
+        </where>
+        order by store.name desc
+        limit #{page}, #{limit};
+    </select>
+    <select id="getStoreOutInInfoCount" resultType="java.lang.Integer">
+        select count(*)
+        from store_outin;
+
+    </select>
+    <select id="getStoreOutInInfoByPage" resultType="com.syuct.pojo.vo.StoreOutInVo">
+        select store_outin.id,
+               storeOut as storeOutName,
+               goods.name as goodsName,
+               number,
+               storeIn  as storeInName,
+               creatTime,
+               store_outin.status
+        from store_outin,
+             goods
+        where store_outin.goodsId = goods.id and deleteFlag != 1
+        order by creatTime desc
+        limit #{page}, #{limit};
+
+    </select>
+    <select id="getStoreOutInInfoCountByParams" resultType="java.lang.Integer">
+        select count(*) from store_outin
+    <where>
+        deleteFlag != 1
+        <if test="goodsId != null">
+            AND store_outin.goodsId = #{goodsId}
+        </if>
+        <if test="storeId != null">
+            AND store_outin.storeOut = #{storeId}
+        </if>
+    </where>
+    </select>
+    <select id="getStoreOutInInfoByParams" resultType="com.syuct.pojo.vo.StoreOutInVo">
+        select store_outin.id,
+               storeOut as storeOutName,
+               goods.name as goodsName,
+               number,
+               storeIn  as storeInName,
+               creatTime,
+               store_outin.status
+        from store_outin,
+             goods
+        <where>
+            store_outin.goodsId = goods.id and delete_flag != 1
+            <if test="goodsId != null">
+                AND store_outin.goodsId = #{goodsId}
+            </if>
+            <if test="storeId != null">
+                AND store_outin.storeOut = #{storeId}
+            </if>
+        </where>
+        order by creatTime desc
+        limit #{page}, #{limit};
+    </select>
+    <select id="getStoreOutInStatusById" resultType="java.lang.Integer">
+        select status
+        from store_outin
+        where id = #{id};
+
+    </select>
+    <select id="getStoreOutInInfoById" resultType="com.syuct.pojo.StoreOutIn">
+        select id, storeOut, goodsId, number, storeIn, creatTime, status, deleteFlag
+        from store_outin
+        where id = #{id};
+
+    </select>
+
+</mapper>

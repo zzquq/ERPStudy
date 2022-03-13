@@ -1,0 +1,293 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.syuct.mapper.CommodityMapper">
+    <insert id="addCategory">
+        insert into category (pid, name, remark, status)
+        values (#{pid}, #{name}, #{remark}, #{status});
+
+    </insert>
+    <insert id="addMeasure">
+        insert into measure (name, status, remark)
+        values (#{name}, #{status}, #{remark});
+
+    </insert>
+    <insert id="addGoods" useGeneratedKeys="true" keyProperty="id">
+        insert into goods (name, category_id, measure_id, safety_stock, remark, status, delete_flag)
+        VALUES (#{name}, #{categoryId}, #{measureId}, #{safetyStock}, #{remark}, #{status}, #{deleteFlag});
+
+    </insert>
+    <insert id="addGoodsSupplier">
+        insert into goods_supplier (gid, sid)
+        VALUES (#{goodsId}, #{goodsSupplier});
+
+    </insert>
+    <update id="delCategory">
+        update category
+        set status = 0
+        where id = #{id};
+
+    </update>
+    <update id="delCategoryByPid">
+        update category
+        set status = 0
+        where pid = #{id};
+
+    </update>
+    <update id="delMeasureById">
+        update measure
+        set status = 0
+        where id = #{id};
+
+    </update>
+    <update id="editMeasure">
+        update measure
+        set name   = #{name},
+            remark = #{remark}
+        where id = #{id};
+
+    </update>
+    <update id="updGoodsInfoById">
+        update goods
+        set name         = #{name},
+            category_id  = #{category},
+            measure_id   = #{measure},
+            safety_stock = #{safetyStock},
+            remark       = #{remark}
+        where id = #{id};
+
+
+    </update>
+    <update id="upGoodsStatusById">
+        update goods
+        set status = 1
+        where id = #{id};
+
+    </update>
+    <update id="downGoodsStatusById">
+        update goods
+        set status = 0
+        where id = #{id};
+
+    </update>
+    <delete id="delGoodsSupplierByGid">
+        delete
+        from goods_supplier
+        where gid = #{id};
+
+    </delete>
+    <update id="delGoodsById">
+        update goods
+        set delete_flag = 1
+        where id = #{id};
+
+    </update>
+
+
+    <select id="getCategoryCounts" resultType="java.lang.Integer">
+        select count(*)
+        from category
+        where status = 1;
+
+    </select>
+    <select id="getCategoryInfo" resultType="com.syuct.pojo.Category">
+        select id, pid, name, remark, status
+        from category
+        where status = 1;
+
+    </select>
+    <select id="getCategoryInfoByPage" resultType="com.syuct.pojo.Category">
+        select id, pid, name, remark, status
+        from category
+        where status = 1
+        limit #{page}, #{limit};
+
+    </select>
+    <select id="getCategoryInfoByparams" resultType="com.syuct.pojo.Category">
+        select id, pid, name, remark, status
+        from category
+        where name like concat('%', #{name}, '%')
+          and status = 1
+        limit #{page}, #{limit};
+
+
+
+    </select>
+    <select id="getCategoryCountsByName" resultType="java.lang.Integer">
+        select count(*)
+        from category
+        where status = 1
+          and name like concat('%', #{name}, '%');
+
+    </select>
+    <select id="getCategoryInfoById" resultType="com.syuct.pojo.Category">
+        select id, pid, name, remark, status
+        from category
+        where id = #{id};
+
+
+    </select>
+    <select id="getCategoryCountsByPid" resultType="java.lang.Integer">
+        select count(*)
+        from category
+        where pid = #{id};
+
+    </select>
+    <select id="getCategoryInfoByPid" resultType="com.syuct.pojo.Category">
+        select id, pid, name, remark, status
+        from category
+        where pid = #{pid}
+          and status = 1;
+
+    </select>
+    <select id="getMeasureCountByPage" resultType="java.lang.Integer">
+        select count(*)
+        from measure
+        where status = 1;
+
+    </select>
+    <select id="getMeasureInfoByPage" resultType="com.syuct.pojo.Measure">
+        select id, name, status, remark
+        from measure
+        where status = 1
+        limit #{page}, #{limit};
+
+    </select>
+    <select id="getMeasureCountById" resultType="com.syuct.pojo.Measure">
+        select id, name, status, remark
+        from measure
+        where id = #{id}
+          and status = 1;
+
+    </select>
+    <select id="getGoodsCountBypage" resultType="java.lang.Integer">
+        select count(*)
+        from goods
+        where delete_flag = 0;
+
+    </select>
+    <select id="getGoodsInfoByPage" resultType="com.syuct.pojo.vo.GoodsVo">
+        SELECT goods.id,
+               goods.`name`,
+               category.`name` as category,
+               measure.`name`  as measure,
+               goods.safety_stock,
+               goods.remark,
+               goods.`status`,
+               goods.delete_flag
+        FROM goods,
+             category,
+             measure
+        where goods.delete_flag = 0
+          and goods.category_id = category.id
+          AND goods.measure_id = measure.id
+        limit #{page}, #{limit};
+
+    </select>
+    <select id="getSupplierInfoByGoodId" resultType="java.lang.String">
+        SELECT supplier.`name` as supplier
+        FROM goods,
+             supplier,
+             goods_supplier
+        where supplier.id = goods_supplier.sid
+          and goods_supplier.gid = goods.id
+          and goods.id = #{id};
+
+    </select>
+    <select id="getGoodsCountByParams" resultType="java.lang.Integer">
+        SELECT
+        COUNT(*)
+        FROM
+        (
+        SELECT
+        goods.*, supplier.name as supplierName
+        FROM
+        supplier ,goods, goods_supplier
+        <where>
+            goods.delete_flag = 0 AND goods_supplier.gid = goods.id AND goods_supplier.sid = supplier.id
+            <if test="id != 0">
+                AND goods.id = #{id}
+            </if>
+            <if test="name != null  and name.trim() != ''">
+                AND goods.name like CONCAT('%',#{name},'%')
+            </if>
+            <if test="supplier != null  and supplier.trim() != ''">
+                AND supplier.name = #{supplier}
+            </if>
+        </where>
+            group by id
+        ) as a;
+
+    </select>
+    <select id="getGoodsInfoByParams" resultType="com.syuct.pojo.vo.GoodsVo">
+        SELECT
+            goods.id,
+            goods.`name`,
+            category.`name` as category,
+            measure.`name`  as measure,
+            goods.safety_stock,
+            goods.remark,
+            goods.`status`,
+            goods.delete_flag
+        FROM
+        supplier ,goods, goods_supplier,category,measure
+        <where>
+            goods.delete_flag = 0 AND goods_supplier.gid = goods.id AND goods_supplier.sid = supplier.id and goods.category_id = category.id and goods.measure_id = measure.id
+            <if test="id != 0">
+                AND goods.id = #{id}
+            </if>
+            <if test="name != null  and name.trim() != ''">
+                AND goods.name like CONCAT('%',#{name},'%')
+            </if>
+            <if test="supplier != null  and supplier.trim() != ''">
+                AND supplier.name = #{supplier}
+            </if>
+        </where>
+        group by id
+        limit #{page}, #{limit};
+    </select>
+    <select id="getGoodsInfoById" resultType="com.syuct.pojo.Goods">
+        select id, name, category_id, measure_id, safety_stock, remark, status, delete_flag
+        from goods
+        where id = #{id};
+
+    </select>
+    <select id="getSupploerIdListByGid" resultType="java.lang.Integer">
+        select sid
+        from goods_supplier
+        where gid = #{id};
+
+    </select>
+    <select id="getGoodsInfoByName" resultType="com.syuct.pojo.vo.GoodsVo">
+        SELECT goods.id,
+               goods.`name`,
+               category.`name` as category,
+               measure.`name`  as measure,
+               goods.safety_stock,
+               goods.remark,
+               goods.`status`,
+               goods.delete_flag
+        FROM goods,
+             category,
+             measure
+            <where>
+              goods.delete_flag = 0
+                and goods.category_id = category.id
+                AND goods.measure_id = measure.id
+                <if test="goodsIdByName != null">
+                    and goods.id = #{goodsIdByName}
+                </if>
+            </where>
+        limit #{page}, #{limit};
+
+    </select>
+
+
+</mapper>
+
+
+
+
+

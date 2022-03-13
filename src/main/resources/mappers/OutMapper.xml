@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.syuct.mapper.OutMapper">
+    <update id="verifyOrderById">
+        update `order`
+        set status = 6
+        where id = #{id};
+
+    </update>
+    <update id="completeOrderById">
+        update `order`
+        set status = 7
+        where id = #{id} ;
+
+    </update>
+    <update id="verifyReturnOutOrder">
+        update `order`
+        set status = 9
+        where id = #{id} ;
+
+    </update>
+
+
+    <select id="getOutOrderCountByPage" resultType="java.lang.Integer">
+        select count(*)
+        from `order`
+        where type = 1 and deleteFlag = 0  and (order.status = 5 or `order`.status = 6 or order.status = 7);
+
+    </select>
+
+    <resultMap id="goodMap" type="com.syuct.pojo.vo.OrderVo">
+        <result javaType="java.math.BigInteger" jdbcType="BIGINT" column="id" property="id"/>
+        <result javaType="java.lang.Integer" jdbcType="INTEGER" column="type" property="type"/>
+        <result javaType="java.math.BigInteger" jdbcType="BIGINT" column="list" property="list"/>
+        <result javaType="java.lang.String" jdbcType="VARCHAR" column="origin" property="origin"/>
+        <result javaType="java.lang.String" jdbcType="VARCHAR" column="account" property="account"/>
+        <result javaType="java.lang.Double" jdbcType="DECIMAL" column="moneyAmount" property="moneyAmount"/>
+        <result javaType="java.lang.String" jdbcType="VARCHAR" column="handsPerson" property="handsPerson"/>
+        <result javaType="java.util.Date" jdbcType="TIMESTAMP" column="createTime" property="createTime"/>
+        <result javaType="java.util.Date" jdbcType="TIMESTAMP" column="updateTime" property="updateTime"/>
+        <result javaType="java.lang.String" jdbcType="INTEGER" column="status" property="status"/>
+        <result javaType="java.lang.Integer" jdbcType="INTEGER" column="deleteFlag" property="deleteFlag"/>
+        <result javaType="java.lang.String" jdbcType="VARCHAR" column="remark" property="remark"/>
+        <!--此处是集合型的成员变量映射配置-->
+        <collection property="orderLIstVos" resultMap="orderLIstVosMap"/>
+    </resultMap>
+    <!--此处是集合的映射配置-->
+    <resultMap id="orderLIstVosMap" type="com.syuct.pojo.vo.OrderLIstVo">
+        <result javaType="java.math.BigInteger" jdbcType="BIGINT" column="orderId" property="orderId"/>
+        <result javaType="java.lang.String" jdbcType="VARCHAR" column="goodsName" property="goodsName"/>
+        <result javaType="java.lang.Integer" jdbcType="INTEGER" column="number" property="number"/>
+        <result javaType="java.lang.Double" jdbcType="DECIMAL" column="price" property="price"/>
+        <result javaType="java.lang.String" jdbcType="VARCHAR" column="storeName" property="storeName"/>
+    </resultMap>
+
+
+    <select id="getOutOderInfoByPage" resultMap="goodMap">
+        select order.id,
+               type,
+               list,
+               member.name as origin,
+               account.name  as account,
+               moneyAmount,
+               admin.name    as handsPerson,
+               createTime,
+               updateTime,
+               `order`.status,
+               `order`.deleteFlag,
+               order_list.orderId,
+               goods.name    as goodsName,
+               number,
+               price,
+               store.name    as storeName,
+               `order`.remark
+        from `order`,
+             order_list,
+             goods,
+             admin,
+             store,
+             member,
+             account
+        where order.deleteFlag = 0
+          and order.type = 1
+          and (order.status = 5 or `order`.status = 6 or order.status = 7)
+          and order.origin = member.id
+          and order.handsPersonId = admin.id
+          and `order`.list = order_list.orderId
+          and goods.id = order_list.goodsId
+          and store.id = order_list.storeId
+          and account.id = `order`.accountId
+
+        order by id desc limit #{page},#{limit};
+
+    </select>
+    <select id="getOutOrderCountByParams" resultType="java.lang.Integer">
+        select count(*)
+        from `order`
+        <where>
+            type = 1 and deleteFlag = 0  and (order.status = 5 or `order`.status = 6 or order.status = 7)
+            <if test="id != null">
+                AND id = #{id}
+            </if>
+            <if test="origin != null">
+                AND origin = #{origin}
+            </if>
+        </where>
+    </select>
+    <select id="getOutOderInfoByParams" resultMap="goodMap">
+        select order.id,
+        type,
+        list,
+        member.name as origin,
+        account.name  as account,
+        moneyAmount,
+        admin.name    as handsPerson,
+        createTime,
+        updateTime,
+        `order`.status,
+        `order`.deleteFlag,
+        order_list.orderId,
+        goods.name    as goodsName,
+        number,
+        price,
+        store.name    as storeName,
+        `order`.remark
+        from `order`,
+        order_list,
+        goods,
+        admin,
+        store,
+        member,
+        account
+        <where>
+            order.deleteFlag = 0
+            and order.type = 1
+            and (order.status = 5 or `order`.status = 6 or order.status = 7)
+            and order.origin = member.id
+            and order.handsPersonId = admin.id
+            and `order`.list = order_list.orderId
+            and goods.id = order_list.goodsId
+            and store.id = order_list.storeId
+            and account.id = `order`.accountId
+            <if test="id != null">
+                AND order.id = #{id}
+            </if>
+            <if test="origin != null">
+                AND order.origin = #{origin}
+            </if>
+        </where>
+        order by id desc limit #{page},#{limit};
+    </select>
+    <select id="getOrderStatusById" resultType="java.lang.Integer">
+        select status
+        from `order`
+        where id = #{id};
+
+    </select>
+    <select id="getSaleCountByPage" resultType="java.lang.Integer">
+        select count(*)
+        from `order`
+        where type = 1 and deleteFlag = 0 and (status = 6 or status = 7);
+
+    </select>
+    <select id="getSaleInfoByPage" resultMap="goodMap">
+        select order.id,
+               type,
+               list,
+               member.name as origin,
+               account.name  as account,
+               moneyAmount,
+               admin.name    as handsPerson,
+               createTime,
+               updateTime,
+               `order`.status,
+               `order`.deleteFlag,
+               order_list.orderId,
+               goods.name    as goodsName,
+               number,
+               price,
+               store.name    as storeName,
+               `order`.remark
+        from `order`,
+             order_list,
+             goods,
+             admin,
+             store,
+             member,
+             account
+        where order.deleteFlag = 0
+          and order.type = 1
+          and (order.status = 6 or order.status = 7)
+          and order.origin = member.id
+          and order.handsPersonId = admin.id
+          and `order`.list = order_list.orderId
+          and goods.id = order_list.goodsId
+          and store.id = order_list.storeId
+          and account.id = `order`.accountId
+
+        order by id desc limit #{page},#{limit};
+
+    </select>
+    <select id="getSaleCountByParams" resultType="java.lang.Integer">
+        select count(*)
+        from `order`
+        <where>
+            type = 1 and deleteFlag = 0 and (status = 6 or status = 7)
+            <if test="id != null">
+                AND id = #{id}
+            </if>
+            <if test="origin != null">
+                AND origin = #{origin}
+            </if>
+        </where>
+    </select>
+    <select id="getSaleInfoByParams" resultMap="goodMap">
+        select order.id,
+        type,
+        list,
+        member.name as origin,
+        account.name  as account,
+        moneyAmount,
+        admin.name    as handsPerson,
+        createTime,
+        updateTime,
+        `order`.status,
+        `order`.deleteFlag,
+        order_list.orderId,
+        goods.name    as goodsName,
+        number,
+        price,
+        store.name    as storeName,
+        `order`.remark
+        from `order`,
+        order_list,
+        goods,
+        admin,
+        store,
+        member,
+        account
+        <where>
+            order.deleteFlag = 0
+            and order.type = 1
+            and (order.status = 6 or order.status = 7)
+            and order.origin = member.id
+            and order.handsPersonId = admin.id
+            and `order`.list = order_list.orderId
+            and goods.id = order_list.goodsId
+            and store.id = order_list.storeId
+            and account.id = `order`.accountId
+            <if test="id != null">
+                AND order.id = #{id}
+            </if>
+            <if test="origin != null">
+                AND order.origin = #{origin}
+            </if>
+        </where>
+        order by id desc limit #{page},#{limit};
+    </select>
+    <select id="getReturnOutOrderCountByPage" resultType="java.lang.Integer">
+        select count(*)
+        from `order`
+        where type = 1 and deleteFlag = 0  and (order.status = 8 or `order`.status = 9);
+    </select>
+    <select id="getReturnInOderInfoByPage" resultMap="goodMap">
+        select order.id,
+               type,
+               list,
+               member.name as origin,
+               account.name  as account,
+               moneyAmount,
+               admin.name    as handsPerson,
+               createTime,
+               updateTime,
+               `order`.status,
+               `order`.deleteFlag,
+               order_list.orderId,
+               goods.name    as goodsName,
+               number,
+               price,
+               store.name    as storeName,
+               `order`.remark
+        from `order`,
+             order_list,
+             goods,
+             admin,
+             store,
+             member,
+             account
+        where order.deleteFlag = 0
+          and order.type = 1
+          and (order.status = 8 or `order`.status = 9)
+          and order.origin = member.id
+          and order.handsPersonId = admin.id
+          and `order`.list = order_list.orderId
+          and goods.id = order_list.goodsId
+          and store.id = order_list.storeId
+          and account.id = `order`.accountId
+
+        order by id desc limit #{page},#{limit};
+
+    </select>
+    <select id="getReturnOutOrderCountByParams" resultType="java.lang.Integer">
+        select count(*)
+        from `order`
+        <where>
+            type = 1 and deleteFlag = 0  and (order.status = 8 or `order`.status = 9)
+            <if test="id != null">
+                AND id = #{id}
+            </if>
+            <if test="origin != null">
+                AND origin = #{origin}
+            </if>
+        </where>
+    </select>
+    <select id="getReturnOutOderInfoByParams" resultMap="goodMap">
+        select order.id,
+        type,
+        list,
+        member.name as origin,
+        account.name  as account,
+        moneyAmount,
+        admin.name    as handsPerson,
+        createTime,
+        updateTime,
+        `order`.status,
+        `order`.deleteFlag,
+        order_list.orderId,
+        goods.name    as goodsName,
+        number,
+        price,
+        store.name    as storeName,
+        `order`.remark
+        from `order`,
+        order_list,
+        goods,
+        admin,
+        store,
+        member,
+        account
+        <where>
+            order.deleteFlag = 0
+            and order.type = 1
+            and (order.status = 8 or `order`.status = 9)
+            and order.origin = member.id
+            and order.handsPersonId = admin.id
+            and `order`.list = order_list.orderId
+            and goods.id = order_list.goodsId
+            and store.id = order_list.storeId
+            and account.id = `order`.accountId
+            <if test="id != null">
+                AND order.id = #{id}
+            </if>
+            <if test="origin != null">
+                AND order.origin = #{origin}
+            </if>
+        </where>
+        order by id desc limit #{page},#{limit};
+    </select>
+
+
+</mapper>
+
+
+
+
+

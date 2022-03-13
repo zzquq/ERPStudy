@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.syuct.mapper.SysMenuMapper">
+
+
+    <select id="findAllByStatusOrderBySort"  resultType="com.syuct.pojo.SysMenu">
+        select * from  system_menu where status = 1 ORDER BY sort
+    </select>
+
+
+    <select id="finfMenuByroleIdOrderBySort"  parameterType="int" resultType="com.syuct.pojo.SysMenu">
+        select * from  system_menu where status = 1 and roleId &lt;= #{roleId} ORDER BY sort
+    </select>
+
+<select id="getMenuById" resultType="sysMenu">
+    select id,
+           pid,
+           title,
+           icon,
+           href,
+           target,
+           sort,
+           status,
+           remark,
+           create_at,
+           update_at,
+           delete_at,
+           roleid
+    from system_menu
+    where id = #{id};
+
+</select>
+
+</mapper>
+
+
+
+
+

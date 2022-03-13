@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>main</title>
+</head>
+<body>
+<h1>main</h1>
+layui.use(['layer', 'form', 'layarea'], function () {
+var layer = layui.layer
+, form = layui.form
+, layarea = layui.layarea;
+
+layarea.render({
+elem: '#area-picker',
+// data: {
+//     province: '广东省',
+//     city: '深圳市',
+//     county: '龙岗区',
+// },
+change: function (res) {
+//选择结果
+console.log(res);
+}
+});
+});
+
+</body>
+</html>
